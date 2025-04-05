@@ -39,7 +39,7 @@ const Chat = () => {
     if (chatPerson?._id) {
       fetchMessages();
     }
-  }, [chatPerson, user, setMessages, message, newMessage, setNewMessage, setChatPerson]);
+  }, [chatPerson, user, setMessages, message, newMessage]);
 
   useEffect(() => {
     const fetchConversations = async () => {
@@ -53,10 +53,9 @@ const Chat = () => {
     if (user?._id) {
       fetchConversations();
     }
-  }, [user, chatPerson, setChatPerson]);
+  }, [user, chatPerson, setChatPerson, message, newMessage]);
 
   useEffect(() => {
-    console.log('New Chat:', chatPerson, newChat);
     socket?.current?.on('getMessage', data => {
       setIncomingMessage({
         senderId: data.senderId,
@@ -70,7 +69,7 @@ const Chat = () => {
     });
 
     console.log('Incoming Message:', incomingMessage);
-  }, [newMessage, addConversation,chatPerson,newChat,setNewChat,socket, incomingMessage]);
+  }, [newMessage, chatPerson, socket, incomingMessage, messages]);
 
   useEffect(() => {
     console.log('chat:', chatPerson?._id , incomingMessage?.senderId);
@@ -79,7 +78,7 @@ const Chat = () => {
     }
 
     console.log('Incoming Message:', incomingMessage);
-  }, [incomingMessage, chatPerson, newChat, setNewChat])
+  }, [incomingMessage, chatPerson])
 
   const handleSendMessage = async (e) => {
 

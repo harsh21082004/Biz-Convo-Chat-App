@@ -7,14 +7,14 @@ import { ConversationContext } from '../context/ConversationContext';
 import { useOpenContext } from '../context/OpenContext';
 
 const Conversations = () => {
-    const {isConversationOpen, handleOpenChat, handleOpenConversation, isChatOpen} = useOpenContext();
+    const { isConversationOpen, handleOpenChat, handleOpenConversation, isChatOpen } = useOpenContext();
     const { toggleNewChatModal } = useContext(NewChatContext);
     const { user, setChatPerson, chatPerson, socket, setActiveUsers } = useContext(AccountContext);
     const [conversationId, setConversationId] = useState([]);
     const [receiverDetails, setReceiverDetails] = useState([]);
     const [lastMessage, setLastMessage] = useState([]);
     const [searchTerm, setSearchTerm] = useState(''); // State for search input
-    const { conversations, newMessage, setNewMessage } = useContext(ConversationContext);
+    const { messages, newMessage, setNewMessage } = useContext(ConversationContext);
 
     useEffect(() => {
         socket?.current?.emit('addUsers', user);
@@ -24,10 +24,13 @@ const Conversations = () => {
         });
     }, [user])
 
+
     const fetchConversation = async () => {
         try {
             const response = await axios.get(`${process.env.REACT_APP_BACKEND_BASE_URL}/api/conversation/get/${user._id}`);
             const conversation = response.data;
+
+            console.log('Conversations:', conversation);
 
             // Sort conversations by the lastMessageTimestamp
             const sortedConversations = conversation.sort((a, b) => {
@@ -64,6 +67,15 @@ const Conversations = () => {
             console.error('Error fetching conversation:', error);
         }
     };
+
+    useEffect(() => {
+        socket?.current?.on('getMessage', data => {
+            console.log('Hello', data);
+            fetchConversation();
+            console.log('Hello', data);
+        });
+
+    }, [newMessage, chatPerson, socket, messages]);
 
     useEffect(() => {
         fetchConversation();
@@ -132,12 +144,12 @@ const Conversations = () => {
                 </div>
                 <form className={`${styles.bottom}`} onSubmit={e => e.preventDefault()}>
                     <div className={`${styles.input}`}>
-                        <input 
-                            type="text" 
-                            id='search' 
-                            value={searchTerm} 
+                        <input
+                            type="text"
+                            id='search'
+                            value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)} // Update search term
-                            placeholder="Search" 
+                            placeholder="Search"
                         />
                         <span><label htmlFor="search"><img src="/search.png" alt="search" /></label></span>
                     </div>

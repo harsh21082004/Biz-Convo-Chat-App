@@ -12,6 +12,11 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
 
+  const [formData, setFormData] = useState({
+    email: '',
+    otp: '',
+  });
+
   // Check token expiration and remove if expired
   useEffect(() => {
     const user = localStorage.getItem('user');
@@ -32,29 +37,31 @@ const Login = () => {
   // });
 
   const handleChange = (e) => {
-    if (e.target.name === 'email') {
-      setEmail(e.target.value);
+    const { name, value } = e.target;
+
+    if (name === 'email') {
+      setEmail(value);
     }
-    if (e.target.name === 'otp') {
-      setOtp(e.target.value);
+    if (name === 'otp') {
+      setOtp(value);
     }
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    console.log('handleLogIn')
+    console.log('handleLogIn', formData)
 
     if (verifying) {
       // Verify OTP step
       try {
-        const response = await axios.post(`${process.env.REACT_APP_BACKEND_BASE_URL}/api/auth/login`, {
-          email: email,
-          otp: otp,
-        }, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
+        const response = await axios.post(`${process.env.REACT_APP_BACKEND_BASE_URL}/api/auth/login`, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
         });
 
         console.log(response);
@@ -75,13 +82,10 @@ const Login = () => {
       }
     } else {
       // Send OTP step
+      console.log(formData);
       try {
-        const response = await axios.post(`${process.env.REACT_APP_BACKEND_BASE_URL}/api/auth/login-email`, {
-          email: email,
-        }, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
+        const response = await axios.post(`${process.env.REACT_APP_BACKEND_BASE_URL}/api/auth/login-email`, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
         });
         console.log(response);
         if (response.data) {

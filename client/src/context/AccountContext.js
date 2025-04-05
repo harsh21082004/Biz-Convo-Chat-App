@@ -14,6 +14,16 @@ const AccountProvider = ({ children }) => {
 
     const socket = useRef();
 
+    console.log("Active Users", activeUsers)
+
+    useEffect(() => {
+        socket?.current?.emit('addUsers', user);
+        socket?.current?.on('getUsers', users => {
+            console.log('Users:', users);
+            setActiveUsers(users);
+        });
+    }, [user])
+
     useEffect(() => {
         socket.current = io('ws://localhost:9000');
 
@@ -62,6 +72,7 @@ const AccountProvider = ({ children }) => {
                 setIsLoggedIn(false);
             }
         } else {
+            socket?.current?.emit("disconnectedUser")
             localStorage.removeItem('token'); // Remove invalid/expired token
             setUser(null);
             setIsLoggedIn(false);
@@ -77,6 +88,7 @@ const AccountProvider = ({ children }) => {
 
     // Function to logout (remove token and user data)
     const logout = () => {
+        socket?.current?.emit("disconnectedUser", user)
         localStorage.removeItem('token');
         setUser(null);
         setIsLoggedIn(false);

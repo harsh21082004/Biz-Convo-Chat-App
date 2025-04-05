@@ -28,4 +28,10 @@ io.on('connection', (socket) => {
         console.log('Data:', data);
         io.emit('getMessage', data);
     })
+
+    socket.on('disconnect', () => {
+        console.log('Disconnected:', socket.id);
+        users = users.filter(user => user.socketId !== socket.id);
+        io.emit('getUsers', users);
+    })
 });
